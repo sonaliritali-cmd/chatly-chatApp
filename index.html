@@ -1,0 +1,1211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatly - Chat App</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+:root {
+    --green: #075e54;
+    --light-green: #00a884;
+    --bg: #efeae2;
+    --panel: #ffffff;
+    --text: #111b21;
+    --muted: #667781;
+    --incoming: #ffffff;
+    --outgoing: #d9fdd3;
+    --border: #e5e5e5;
+}
+
+body {
+    background: #dce5e2;
+    color: var(--text);
+    height: 100vh;
+    display: grid;
+    place-items: center;
+}
+
+button, input, textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    display: flex;
+    width: 96%;
+    max-width: 1300px;
+    height: 94vh;
+    background: var(--panel);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 25px #0002;
+}
+
+.sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+}
+
+.header {
+    background: var(--green);
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.header button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    padding: 5px;
+}
+
+.tabs {
+    display: flex;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+}
+
+.tab {
+    flex: 1;
+    padding: 13px 5px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+}
+
+.tab.active {
+    color: var(--light-green);
+    border-color: var(--light-green);
+    font-weight: bold;
+}
+
+.search {
+    padding: 10px;
+}
+
+.search input {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    outline: none;
+    border-radius: 8px;
+    background: #f0f2f5;
+}
+
+.chat-list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.contact:hover,
+.contact.active {
+    background: #e9edef;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #d5f3e9;
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-info p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 12px 15px;
+    background: #f0f2f5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-details p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.icon-btn {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    padding: 5px;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: var(--bg);
+    background-image: radial-gradient(#d5d0c7 0.6px, transparent 0.6px);
+    background-size: 18px 18px;
+}
+
+.day {
+    text-align: center;
+    background: #fff9;
+    padding: 7px;
+    width: max-content;
+    margin: 0 auto 18px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #555;
+}
+
+.message {
+    background: var(--incoming);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 9px;
+    margin-bottom: 12px;
+    max-width: 78%;
+    width: fit-content;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px #0001;
+}
+
+.message.me {
+    margin-left: auto;
+    background: var(--outgoing);
+}
+
+.sender {
+    font-size: 12px;
+    color: var(--light-green);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.reply-preview {
+    border-left: 3px solid var(--light-green);
+    background: #0000000b;
+    padding: 7px;
+    margin-bottom: 7px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.message img {
+    max-width: 240px;
+    width: 100%;
+    display: block;
+    border-radius: 7px;
+    margin-bottom: 5px;
+}
+
+.message small {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+.tools {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.tools button {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.reply-bar {
+    display: none;
+    padding: 9px 14px;
+    background: #f0f2f5;
+    border-left: 4px solid var(--light-green);
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.reply-bar.show {
+    display: flex;
+}
+
+.composer {
+    display: flex;
+    gap: 7px;
+    align-items: flex-end;
+    padding: 10px;
+    background: #f0f2f5;
+}
+
+.composer textarea {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    max-height: 120px;
+    min-height: 42px;
+    border: none;
+    outline: none;
+    border-radius: 22px;
+    padding: 12px 15px;
+    background: white;
+}
+
+.send-btn {
+    border: none;
+    background: var(--light-green);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 25px;
+}
+
+.attach {
+    font-size: 22px;
+    padding: 7px;
+    cursor: pointer;
+}
+
+.attach input {
+    display: none;
+}
+
+.panel {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: var(--panel);
+}
+
+.panel.open {
+    display: block;
+}
+
+.panel h2 {
+    margin-bottom: 15px;
+}
+
+.panel input,
+.panel textarea,
+.panel select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    margin: 7px 0 15px;
+    background: var(--panel);
+    color: var(--text);
+}
+
+.primary {
+    border: none;
+    background: var(--light-green);
+    color: white;
+    padding: 11px 15px;
+    border-radius: 7px;
+}
+
+.status-item,
+.call-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 5px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.status-content {
+    min-height: 300px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: white;
+    padding: 20px;
+    font-size: 25px;
+    overflow-wrap: anywhere;
+}
+
+.notice {
+    padding: 9px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.empty {
+    text-align: center;
+    margin-top: 100px;
+    color: var(--muted);
+}
+
+body.dark {
+    --panel: #111b21;
+    --text: #e9edef;
+    --muted: #aebac1;
+    --border: #26353d;
+    --bg: #0b141a;
+    --incoming: #202c33;
+    --outgoing: #005c4b;
+    background: #0b141a;
+}
+
+body.dark .chat-header,
+body.dark .composer,
+body.dark .reply-bar {
+    background: #202c33;
+}
+
+body.dark .contact:hover,
+body.dark .contact.active {
+    background: #26353d;
+}
+
+body.dark .search input,
+body.dark .composer textarea {
+    background: #2a3942;
+    color: white;
+}
+
+body.dark .messages {
+    background-image: none;
+}
+
+@media(max-width:650px) {
+    .app {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .sidebar {
+        width: 82px;
+    }
+
+    .brand-name,
+    .search,
+    .contact-info {
+        display: none;
+    }
+
+    .header {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 8px 2px;
+    }
+
+    .header button {
+        font-size: 16px;
+    }
+
+    .contact {
+        justify-content: center;
+        padding: 12px 3px;
+    }
+
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tab {
+        padding: 9px 2px;
+    }
+
+    .chat-header {
+        padding: 10px 5px;
+        gap: 4px;
+    }
+
+    .chat-header .icon-btn {
+        font-size: 16px;
+    }
+
+    .messages {
+        padding: 12px 7px;
+    }
+
+    .message {
+        max-width: 92%;
+    }
+
+    .composer {
+        padding: 7px 3px;
+        gap: 3px;
+    }
+
+    .send-btn {
+        padding: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+
+        <div class="header">
+            <h3>💬 <span class="brand-name">Chatly</span></h3>
+            <div>
+                <button onclick="openProfile()" title="Profile">👤</button>
+                <button onclick="newChat()" title="New chat">＋</button>
+                <button onclick="newGroup()" title="New group">👥</button>
+                <button onclick="toggleDark()" title="Dark mode">🌙</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('chats',this)">💬 <span>Chats</span></button>
+            <button class="tab" onclick="switchTab('status',this)">◉ <span>Status</span></button>
+            <button class="tab" onclick="switchTab('calls',this)">📞 <span>Calls</span></button>
+        </div>
+
+        <div class="search">
+            <input id="search" placeholder="Search chats..."
+                   oninput="renderSidebar()">
+        </div>
+
+        <div class="chat-list" id="chatList"></div>
+
+        <div class="notice">Chatly demo · Saved in this browser</div>
+
+    </aside>
+
+    <main class="main">
+
+        <div class="chat-header">
+            <div class="avatar" id="headAvatar">💬</div>
+
+            <div class="chat-details">
+                <strong id="headName">Welcome to Chatly</strong>
+                <p id="headStatus">Select a conversation</p>
+            </div>
+
+            <button class="icon-btn" onclick="startCall('Voice')" title="Voice call">📞</button>
+            <button class="icon-btn" onclick="startCall('Video')" title="Video call">📹</button>
+            <button class="icon-btn" onclick="searchMessages()" title="Search messages">🔍</button>
+            <button class="icon-btn" onclick="chatOptions()" title="Chat options">⋮</button>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="empty">
+                <h2>Welcome to Chatly 💚</h2>
+                <p>Select a chat to start messaging.</p>
+            </div>
+        </div>
+
+        <div class="reply-bar" id="replyBar">
+            <span id="replyText">Replying to message</span>
+            <button class="icon-btn" onclick="cancelReply()">✕</button>
+        </div>
+
+        <div class="composer">
+            <button class="icon-btn" onclick="insertEmoji()">😊</button>
+
+            <label class="attach" title="Attach image">
+                📎
+                <input type="file" id="imageInput"
+                       accept="image/*" onchange="sendImage(event)">
+            </label>
+
+            <textarea id="messageInput" rows="1"
+                      placeholder="Type a message..."
+                      onkeydown="handleKey(event)"
+                      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+
+        <section class="panel" id="profilePanel">
+            <h2>👤 My Profile</h2>
+            <div class="avatar" id="profileAvatar">S</div>
+            <label>Display name</label>
+            <input id="profileName" maxlength="40">
+            <label>About</label>
+            <input id="profileAbout" maxlength="100">
+            <label>Profile photo</label>
+            <input type="file" id="profilePhoto" accept="image/*">
+            <button class="primary" onclick="saveProfile()">Save Profile</button>
+        </section>
+
+        <section class="panel" id="statusPanel">
+            <h2>◉ Status</h2>
+            <button class="primary" onclick="createStatus()">＋ Add Status</button>
+            <div id="statusList"></div>
+        </section>
+
+        <section class="panel" id="callsPanel">
+            <h2>📞 Call History</h2>
+            <div id="callsList"></div>
+        </section>
+
+        <section class="panel" id="statusViewer">
+            <button class="primary" onclick="closePanels()">← Back</button>
+            <div class="status-content" id="statusContent"></div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+const starterChats = [
+    {
+        id: 1, name: "Alex", group: false, online: true,
+        messages: [
+            {id: 101, from: "them", text: "Hey Sonali! 👋", time: "10:15 AM"},
+            {id: 102, from: "me", text: "Hi! How are you?", time: "10:16 AM"},
+            {id: 103, from: "them", text: "I am good! Did you finish your project?", time: "10:17 AM"},
+            {id: 104, from: "me", text: "Almost done. I am working on my Chat App.", time: "10:18 AM"},
+            {id: 105, from: "them", text: "That's great! Send me the link when it is ready.", time: "10:19 AM"}
+        ]
+    },
+    {
+        id: 2, name: "Friends Group", group: true, online: false,
+        members: ["Sonali", "Riya", "Alex", "Arun"],
+        messages: [
+            {id: 201, from: "them", sender: "Riya", text: "Good morning everyone! 🌞", time: "9:00 AM"},
+            {id: 202, from: "them", sender: "Alex", text: "Good morning!", time: "9:02 AM"},
+            {id: 203, from: "me", text: "Good morning friends 💚", time: "9:04 AM"},
+            {id: 204, from: "them", sender: "Arun", text: "Are we meeting at college today?", time: "9:05 AM"},
+            {id: 205, from: "them", sender: "Riya", text: "Yes! We should discuss our project, complete the presentation, divide the remaining tasks, and share all the files before the deadline.", time: "9:06 AM"}
+        ]
+    },
+    {
+        id: 3, name: "Riya", group: false, online: true,
+        messages: [
+            {id: 301, from: "them", text: "Hi Sonali 😊", time: "Yesterday"},
+            {id: 302, from: "me", text: "Hey Riya! What are you doing?", time: "Yesterday"},
+            {id: 303, from: "them", text: "I am studying JavaScript. Can you share your notes later?", time: "Yesterday"}
+        ]
+    },
+    {
+        id: 4, name: "College Friends", group: true, online: false,
+        members: ["Sonali", "Riya", "Arun"],
+        messages: [
+            {id: 401, from: "them", sender: "Arun", text: "Bring your DBMS notes tomorrow.", time: "Yesterday"},
+            {id: 402, from: "me", text: "Okay, I will bring them.", time: "Yesterday"}
+        ]
+    }
+];
+
+let saved;
+try {
+    saved = JSON.parse(localStorage.getItem("chatlyData"));
+} catch (e) {
+    saved = null;
+}
+
+let chats = saved?.chats || starterChats;
+let activeId = saved?.activeId ?? 1;
+let statuses = saved?.statuses || [];
+let calls = saved?.calls || [];
+let profile = saved?.profile || {
+    name: "Sonali",
+    about: "Hey there! I am using Chatly",
+    photo: ""
+};
+let replyTarget = null;
+let activeTab = "chats";
+
+function saveData() {
+    try {
+        localStorage.setItem("chatlyData", JSON.stringify({
+            chats, activeId, statuses, calls, profile,
+            dark: document.body.classList.contains("dark")
+        }));
+    } catch (e) {
+        alert("Browser storage is full. Try removing some images.");
+    }
+}
+
+function currentChat() {
+    return chats.find(c => c.id === activeId);
+}
+
+function now() {
+    return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function safe(text = "") {
+    return String(text).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+    })[c]);
+}
+
+function avatar(chat) {
+    if (chat.photo) {
+        return '<img src="' + chat.photo + '" alt="">';
+    }
+    return safe(chat.group ? "👥" : chat.name[0].toUpperCase());
+}
+
+function renderSidebar() {
+    const list = document.getElementById("chatList");
+    list.innerHTML = "";
+
+    if (activeTab === "status") {
+        renderStatuses();
+        return;
+    }
+
+    if (activeTab === "calls") {
+        renderCalls();
+        return;
+    }
+
+    const query = document.getElementById("search").value.toLowerCase();
+
+    chats.filter(c =>
+        c.name.toLowerCase().includes(query) ||
+        c.messages.some(m => (m.text || "").toLowerCase().includes(query))
+    ).forEach(chat => {
+        const last = chat.messages[chat.messages.length - 1];
+        const item = document.createElement("div");
+
+        item.className = "contact" +
+            (chat.id === activeId ? " active" : "");
+
+        item.innerHTML = `
+            <div class="avatar">${avatar(chat)}</div>
+            <div class="contact-info">
+                <strong>${safe(chat.name)}</strong>
+                <p>${safe(last?.text || (last?.image ? "📷 Photo" : "No messages yet"))}</p>
+            </div>
+        `;
+
+        item.onclick = () => selectChat(chat.id);
+        list.appendChild(item);
+    });
+}
+
+function selectChat(id) {
+    activeId = id;
+    replyTarget = null;
+    document.getElementById("replyBar").classList.remove("show");
+    closePanels();
+    renderAll();
+    saveData();
+}
+
+function renderAll() {
+    renderSidebar();
+    renderMessages();
+    updateHeader();
+}
+
+function updateHeader() {
+    const c = currentChat();
+    if (!c) return;
+
+    document.getElementById("headName").textContent = c.name;
+    document.getElementById("headAvatar").innerHTML = avatar(c);
+
+    document.getElementById("headStatus").textContent =
+        c.group ? (c.members || []).length + " members · group" :
+        (c.online ? "online" : "last seen recently");
+}
+
+function renderMessages() {
+    const box = document.getElementById("messages");
+    const c = currentChat();
+
+    if (!c) {
+        box.innerHTML = '<div class="empty">Select a chat to begin.</div>';
+        return;
+    }
+
+    box.innerHTML = '<div class="day">TODAY</div>';
+
+    c.messages.forEach(m => {
+        const bubble = document.createElement("div");
+        bubble.className = "message" + (m.from === "me" ? " me" : "");
+        bubble.id = "msg-" + m.id;
+
+        let html = "";
+
+        if (c.group && m.from !== "me" && m.sender) {
+            html += '<div class="sender">' + safe(m.sender) + '</div>';
+        }
+
+        if (m.reply) {
+            html += `
+                <div class="reply-preview" onclick="jumpTo(${m.reply.id})">
+                    <b>${safe(m.reply.sender || (m.reply.from === "me" ? "You" : c.name))}</b><br>
+                    ${safe(m.reply.text || "📷 Photo")}
+                </div>
+            `;
+        }
+
+        if (m.image) {
+            html += '<img src="' + m.image + '" alt="Shared image">';
+        }
+
+        if (m.text) {
+            html += '<div>' + safe(m.text) + '</div>';
+        }
+
+        html += `
+            <small>${safe(m.time || "")}
+                ${m.from === "me" ? '<span style="color:#53a6c7">✓✓</span>' : ''}
+            </small>
+            <div class="tools">
+                <button onclick="replyTo(${m.id})">↩ Reply</button>
+                <button onclick="deleteMessage(${m.id})">🗑 Delete</button>
+            </div>
+        `;
+
+        bubble.innerHTML = html;
+        box.appendChild(bubble);
+    });
+
+    box.scrollTop = box.scrollHeight;
+}
+
+function handleKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+}
+
+function sendMessage(extra = {}) {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    const c = currentChat();
+
+    if (!c) {
+        alert("Select a chat first!");
+        return;
+    }
+
+    if (!text && !extra.image) return;
+
+    const message = {
+        id: Date.now(),
+        from: "me",
+        text,
+        time: now(),
+        ...extra
+    };
+
+    if (replyTarget) {
+        message.reply = {
+            id: replyTarget.id,
+            text: replyTarget.text,
+            from: replyTarget.from,
+            sender: replyTarget.sender
+        };
+    }
+
+    c.messages.push(message);
+    input.value = "";
+    input.style.height = "auto";
+    replyTarget = null;
+
+    document.getElementById("replyBar").classList.remove("show");
+
+    saveData();
+    renderAll();
+}
+
+function replyTo(id) {
+    const m = currentChat().messages.find(x => x.id === id);
+    if (!m) return;
+
+    replyTarget = m;
+    document.getElementById("replyText").textContent =
+        "Replying to: " + (m.text || "Photo");
+
+    document.getElementById("replyBar").classList.add("show");
+    document.getElementById("messageInput").focus();
+}
+
+function cancelReply() {
+    replyTarget = null;
+    document.getElementById("replyBar").classList.remove("show");
+}
+
+function jumpTo(id) {
+    const el = document.getElementById("msg-" + id);
+    if (el) el.scrollIntoView({behavior: "smooth", block: "center"});
+}
+
+function deleteMessage(id) {
+    if (!confirm("Delete this message?")) return;
+
+    const c = currentChat();
+    c.messages = c.messages.filter(m => m.id !== id);
+
+    saveData();
+    renderAll();
+}
+
+function insertEmoji() {
+    const input = document.getElementById("messageInput");
+    input.value += " 😊";
+    input.focus();
+}
+
+function sendImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!currentChat()) {
+        alert("Select a chat first!");
+        event.target.value = "";
+        return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+        alert("Please choose an image.");
+        event.target.value = "";
+        return;
+    }
+
+    if (file.size > 400 * 1024) {
+        alert("Choose an image smaller than 400 KB.");
+        event.target.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        sendMessage({image: reader.result});
+        event.target.value = "";
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function newChat() {
+    const name = prompt("Enter contact name:");
+    if (!name || !name.trim()) return;
+
+    const c = {
+        id: Date.now(),
+        name: name.trim(),
+        group: false,
+        online: true,
+        messages: []
+    };
+
+    chats.unshift(c);
+    activeTab = "chats";
+    selectChat(c.id);
+}
+
+function newGroup() {
+    const name = prompt("Enter group name:");
+    if (!name || !name.trim()) return;
+
+    const names = prompt("Enter member names separated by commas:") || "";
+
+    const c = {
+        id: Date.now(),
+        name: name.trim(),
+        group: true,
+        online: false,
+        members: [profile.name, ...names.split(",").map(n => n.trim()).filter(Boolean)],
+        messages: []
+    };
+
+    chats.unshift(c);
+    activeTab = "chats";
+    selectChat(c.id);
+}
+
+function chatOptions() {
+    const c = currentChat();
+    if (!c) return alert("Select a chat first!");
+
+    const action = prompt(
+        "Chat options:\n1. Rename chat\n2. View group members\n3. Clear messages\n4. Delete chat"
+    );
+
+    if (action === "1") {
+        const name = prompt("Enter new name:", c.name);
+        if (name && name.trim()) c.name = name.trim();
+    } else if (action === "2") {
+        alert(c.group ? (c.members || []).join("\n") : "This is a private chat.");
+        return;
+    } else if (action === "3") {
+        if (confirm("Clear all messages?")) c.messages = [];
+    } else if (action === "4") {
+        if (confirm("Delete this chat?")) {
+            chats = chats.filter(x => x.id !== c.id);
+            activeId = chats[0]?.id ?? null;
+        }
+    }
+
+    saveData();
+    renderAll();
+}
+
+function searchMessages() {
+    const c = currentChat();
+    if (!c) return alert("Select a chat first!");
+
+    const query = prompt("Search messages:");
+    if (!query) return;
+
+    const found = c.messages.filter(m =>
+        (m.text || "").toLowerCase().includes(query.toLowerCase())
+    );
+
+    alert(found.length
+        ? found.map(m => m.text || "Photo").join("\n\n")
+        : "No matching messages found.");
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+    saveData();
+}
+
+function switchTab(tab, button) {
+    activeTab = tab;
+
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    button.classList.add("active");
+
+    document.getElementById("search").placeholder =
+        tab === "chats" ? "Search chats..." :
+        tab === "status" ? "Status updates" : "Call history";
+
+    closePanels();
+
+    if (tab === "status") {
+        document.getElementById("statusPanel").classList.add("open");
+    } else if (tab === "calls") {
+        document.getElementById("callsPanel").classList.add("open");
+    }
+
+    renderSidebar();
+}
+
+function createStatus() {
+    const text = prompt("Write your status:");
+    if (!text || !text.trim()) return;
+
+    statuses.push({
+        id: Date.now(),
+        name: profile.name,
+        text: text.trim(),
+        time: now(),
+        color: ["#075e54", "#5b4bca", "#b34b62", "#174b72"][
+            Math.floor(Math.random() * 4)
+        ]
+    });
+
+    saveData();
+    renderStatuses();
+}
+
+function renderStatuses() {
+    const list = document.getElementById("statusList");
+    list.innerHTML = "";
+
+    statuses.slice().reverse().forEach(s => {
+        const item = document.createElement("div");
+        item.className = "status-item";
+        item.innerHTML = `
+            <div class="avatar">◉</div>
+            <div><strong>${safe(s.name)}</strong>
+            <p>${safe(s.text)}</p></div>
+        `;
+
+        item.onclick = () => viewStatus(s);
+        list.appendChild(item);
+    });
+
+    const side = document.getElementById("chatList");
+    side.innerHTML = `
+        <div class="contact" onclick="createStatus()">
+            <div class="avatar">＋</div>
+            <div class="contact-info"><strong>My Status</strong>
+            <p>Add a status update</p></div>
+        </div>
+    `;
+}
+
+function viewStatus(s) {
+    const viewer = document.getElementById("statusViewer");
+    const content = document.getElementById("statusContent");
+
+    content.style.background = s.color || "#075e54";
+    content.textContent = s.text + "\n\n" + s.name + " · " + s.time;
+
+    closePanels();
+    viewer.classList.add("open");
+}
+
+function startCall(kind) {
+    const c = currentChat();
+    if (!c) return alert("Select a chat first!");
+
+    calls.push({
+        id: Date.now(),
+        name: c.name,
+        kind,
+        time: now()
+    });
+
+    saveData();
+    renderCalls();
+
+    alert(kind + " call with " + c.name +
+        "\n\nThis is a demo screen. Real calls need WebRTC and a backend.");
+}
+
+function renderCalls() {
+    const list = document.getElementById("callsList");
+    list.innerHTML = "";
+
+    calls.slice().reverse().forEach(call => {
+        const item = document.createElement("div");
+        item.className = "call-item";
+        item.innerHTML = `
+            <div class="avatar">${call.kind === "Video" ? "📹" : "📞"}</div>
+            <div><strong>${safe(call.name)}</strong>
+            <p>${safe(call.kind)} call · ${safe(call.time)}</p></div>
+        `;
+        list.appendChild(item);
+    });
+
+    document.getElementById("chatList").innerHTML = "";
+}
+
+function openProfile() {
+    closePanels();
+
+    document.getElementById("profileName").value = profile.name;
+    document.getElementById("profileAbout").value = profile.about;
+    document.getElementById("profileAvatar").innerHTML =
+        profile.photo ? '<img src="' + profile.photo + '">' : safe(profile.name[0]);
+
+    document.getElementById("profilePanel").classList.add("open");
+}
+
+function saveProfile() {
+    const name = document.getElementById("profileName").value.trim();
+    if (!name) return alert("Enter your name.");
+
+    profile.name = name;
+    profile.about = document.getElementById("profileAbout").value.trim();
+
+    const file = document.getElementById("profilePhoto").files[0];
+
+    function finish() {
+        saveData();
+        closePanels();
+        renderAll();
+    }
+
+    if (file) {
+        if (file.size > 400 * 1024) {
+            return alert("Choose a photo smaller than 400 KB.");
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            profile.photo = reader.result;
+            finish();
+        };
+        reader.readAsDataURL(file);
+    } else {
+        finish();
+    }
+}
+
+function closePanels() {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("open"));
+}
+
+// Restore the saved theme.
+if (saved?.dark) {
+    document.body.classList.add("dark");
+}
+
+// Start the app.
+renderAll();
+</script>
+
+</body>
+</html>
